@@ -19,5 +19,5 @@ function carregar(pagina, linkAtivo = null) {
 // Carrega conteúdo padrão ao iniciar e ativa menu
 window.onload = () => {
   const primeiroLink = document.querySelector('.sidebar ul li a[href="#"]');
-  carregar('inicio.html', primeiroLink);
+  carregar('home.html', primeiroLink);
 };
