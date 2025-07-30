@@ -1,7 +1,7 @@
 <!-- Contents/portfolio.html -->
 
 <h1>My Portfolio</h1>
-
+<!-- Card 0 – Airlines Routes -->
 <section class="card">
   <h2>Information Visualization – Programming with D3.js</h2>
   <p>
@@ -20,15 +20,102 @@
           style="border: 1px solid #ccc; border-radius: 8px;"></iframe>
 </section>
 
+<!-- PROJECT: Executive Overview – Contoso -->
+<section class="card project-card">
+  <h2>Executive Overview – Contoso Sales Dashboard</h2>
 
-<!-- Card 1 – Imagem abaixo do texto (padrão) -->
-<section class="card">
-  <h3>01. Power BI – Sales Performance Dashboard</h3>
+  <!-- Dashboard image -->
+  <img
+    src="Projects/contoso-sales-2M/Executive Overview.png"
+    alt="Executive Overview dashboard featuring a combo bar‑line chart of Revenue vs Target, a product‑category revenue funnel, horizontal bar charts for store revenue, a sales‑channel pie chart, and a revenue‑by‑country choropleth map."
+    loading="lazy"
+    style="width:100%; height:auto;"
+  />
+
+  <!-- Project description -->
   <p>
-    Interactive dashboard built in Power BI to track KPIs, revenue growth, and sales team performance. Designed for executive-level insights with slicers and year-over-year comparisons.
+    This dashboard delivers a high‑level performance snapshot for Contoso’s leadership team.
+    <strong>Key elements:</strong>
+    <ul>
+      <li><em>Revenue vs Target:</em> a combined bar + line chart tracking monthly revenue against goal.</li>
+      <li><em>Product Structure Funnel:</em> highlights how revenue cascades through product categories.</li>
+      <li><em>Store Revenue:</em> two horizontal bar visuals separate brick‑and‑mortar stores from other sales channels.</li>
+      <li><em>Sales Channel Share:</em> a pie chart showing each channel’s percentage contribution.</li>
+      <li><em>Revenue Heat Map:</em> a choropleth map that pinpoints the top‑performing countries.</li>
+    </ul>
+    Built on a star schema and optimized DAX, the report supports full interactivity:
+    slicers for date and geography, drill‑through to store‑level detail, and rich tooltips with margin and volume metrics.
+    It demonstrates best practices for storytelling and performance with a data set exceeding two million rows.
   </p>
-  <img src="img/placeholder1.png" alt="Sales Dashboard" style="width: 100%; border-radius: 8px; margin-top: 15px;">
 </section>
+
+<!-- PROJECT: DAX Deep‑Dive – Nested Iterators vs Summarize -->
+<section class="card project-card">
+  <h2>Reducing Nested Iterators in DAX – A Hands‑On Example</h2>
+
+  <!-- Code comparison -->
+  <h3>Original query (non‑optimized)</h3>
+  <pre><code>EVALUATE
+{
+    SUMX(                    -- Outer iterator
+        Store,
+        SUMX(                -- Inner iterator
+            Customer,
+            [Sales Amount]   -- callback to FE
+        )
+    )
+}</code></pre>
+
+  <h3>Optimized query</h3>
+  <pre><code>EVALUATE
+{
+    SUMX(
+        SUMMARIZE (
+            Sales,           -- single table
+            Sales[CustomerKey],
+            Sales[StoreKey]
+        ),
+        [Sales Amount]       -- computed in SE
+    )
+}</code></pre>
+
+  <!-- Performance delta -->
+  <table>
+    <thead>
+      <tr><th>Metric</th><th>Original</th><th>Optimized</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Total time (ms)</td><td>45 265</td><td>22 087</td></tr>
+      <tr><td>Formula Engine (FE)</td><td>19 841</td><td>3 760</td></tr>
+      <tr><td>Storage Engine (SE)</td><td>25 424</td><td>18 327</td></tr>
+      <tr><td>SE CPU</td><td>129 906</td><td>57 578</td></tr>
+      <tr><td>SE Parallelism</td><td>× 5.1</td><td>× 3.1</td></tr>
+    </tbody>
+  </table>
+
+  <!-- Narrative -->
+  <p>
+    The first version uses a <strong>double iterator</strong> (<code>SUMX(Store, SUMX(Customer…))</code>).
+    That forces the Formula Engine (FE) to loop over <em>every possible combination</em> of stores and customers,
+    triggering expensive <em>callback data caches</em> to pull partial results from the Storage Engine (SE).
+    Relationships between <code>Sales</code>, <code>Store</code> and <code>Customer</code> must also be materialized,
+    adding extra cost.
+  </p>
+  <p>
+    By rewriting the query with <code>SUMMARIZE(Sales, Sales[CustomerKey], Sales[StoreKey])</code> we:
+  </p>
+  <ul>
+    <li>Iterate only on <em>existing</em> pairs of <code>Store&nbsp;×&nbsp;Customer</code> – no wasted loops.</li>
+    <li>Stay entirely inside the <code>Sales</code> fact table, so relationship navigation is eliminated.</li>
+    <li>Let the SE calculate <code>[Sales Amount]</code>, removing FE callbacks – FE just performs the final agregation.</li>
+  </ul>
+  <p>
+    The result is a 50 % reduction in total execution time and a FE workload that drops from 19.8 ms to 3.8 ms,
+    demonstrating how <strong>query‑plan analysis and xmSQL inspection</strong> lead to practical,
+    measurable gains.
+  </p>
+</section>
+
 
 <!-- Card 2 – Imagem ao lado do texto -->
 <section class="card" style="display: flex; gap: 30px; align-items: center; flex-wrap: wrap;">
