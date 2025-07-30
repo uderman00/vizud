@@ -152,7 +152,7 @@ body {
 .code-box .number { color: #d14; }
 
 /********* Performance table *********/
-.perf-table { width: 100%; border-collapse: collapse; margin: 1rem 0; }
+.perf-table { width: auto; border-collapse: collapse; margin: 1rem 0; }
 .perf-table th, .perf-table td { padding: 6px 10px; font-size: 0.9rem; }
 .perf-table th { background: #0f172a; color: #ffffff; text-align: left; }
 .perf-table td.numeric { text-align: right; white-space: nowrap; font-family: Consolas, "Courier New", monospace; }

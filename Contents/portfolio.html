@@ -181,4 +181,77 @@
   </p>
 </section>
 
+<!-- NEW CASE – Last Price per Product -->
+<section class="card project-card">
+  <h3>Reducing Large Materialization in “Last Price per Product”</h3>
+
+  <p>
+    Calculating the <em>latest net price</em> for each product looks simple, yet an
+    intuitive approach can trigger a massive materialization: the Storage Engine (SE)
+    builds <strong>8 million</strong> rows — every <code>Product × Order Date</code> pair —
+    and ships them to the Formula Engine (FE), which then filters for the last date.
+    The case below shows how pre‑calculating <code>LastOrderDate</code> inside the
+    row context slashes the result set to just <strong>1.5 k</strong> rows and cuts
+    query time by an order of magnitude.
+  </p>
+
+  <!-- Code comparison -->
+  <h4>Original query (non‑optimized)</h4>
+  <pre class="code-box"><code><span class="func">EVALUATE</span>
+
+<span class="func">SUMMARIZECOLUMNS</span>(
+    'Product'[Product Name],
+    <span class="string">\"last price\"</span>,
+        <span class="func">CALCULATE</span>(
+            <span class="func">AVERAGE</span>( Sales[Net Price] ),
+            <span class="func">LASTDATE</span>( Sales[Order Date] )
+        )
+)
+</code></pre>
+
+  <h4>Optimized query</h4>
+  <pre class="code-box"><code><span class="func">EVALUATE</span>
+
+<span class="func">SUMMARIZECOLUMNS</span>(
+    'Product'[Product Name],
+    <span class="string">\"Last Price\"</span>,
+        <span class="func">CALCULATE</span>(
+            <span class="keyword">VAR</span> LastOrderDate =
+                <span class="func">MAX</span>( Sales[Order Date] )
+            <span class="keyword">VAR</span> Result =
+                <span class="func">CALCULATE</span>(
+                    <span class="func">AVERAGE</span>( Sales[Net Price] ),
+                    Sales[Order Date] = LastOrderDate
+                )
+            <span class="keyword">RETURN</span>
+                Result
+        )
+)
+</code></pre>
+
+  <!-- Performance delta -->
+  <table class="perf-table">
+    <thead>
+      <tr><th>Metric</th><th>Original</th><th>Optimized</th><th>Δ / %</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Total time</td><td class="numeric">10.687ms</td><td class="numeric">767ms</td><td class="numeric improved">↓ 93 %</td></tr>
+      <tr><td>Formula Engine&nbsp;(FE)</td><td class="numeric">2.599ms</td><td class="numeric">18ms</td><td class="numeric improved">↓ 99 %</td></tr>
+      <tr><td>Storage Engine&nbsp;(SE)</td><td class="numeric">8.088ms</td><td class="numeric">749ms</td><td class="numeric improved">↓ 91 %</td></tr>
+      <tr><td>SE CPU</td><td class="numeric">35.000ms</td><td class="numeric">5.016ms</td><td class="numeric improved">↓ 86 %</td></tr>
+      <tr><td>SE Parallelism</td><td class="numeric">× 4.3</td><td class="numeric">× 6.7</td><td class="numeric improved">↑ 56 %</td></tr>
+    </tbody>
+  </table>
+
+  <p>
+    By computing <code>LastOrderDate</code> in a <code>VAR</code>, the SE only needs
+    to materialize <code>Product</code>-level granularity (≈ 1 500 rows). FE work
+    nearly disappears, callbacks shrink, and execution time drops from 10.7 s to
+    0.8 s.
+  </p>
+
+  <p class="backtop"><a href="#top">Back to top ↑</a></p>
+</section>
+
+
 <p class="backtop"><a href="#top">Back to top ↑</a></p>
