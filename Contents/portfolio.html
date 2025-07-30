@@ -1,9 +1,23 @@
 <!-- Contents/portfolio.html -->
 
-<h1>My Portfolio</h1>
+<h1 id="top">My Portfolio</h1>
 <!-- Card 0 – Airlines Routes -->
+
+<p class="intro">
+  Welcome! Here you’ll find a curated selection of projects that showcase my range as a data professional—
+  from interactive D3.js visualisations to enterprise‑grade Power BI dashboards and deep‑dive DAX
+  optimisation cases. Choose a track below or simply scroll to explore.
+</p>
+
+<nav class="portfolio-nav">
+  <a href="#viz">Interactive Data Visualization </a>
+  <a href="#bi">Business Intelligence Dashboards</a>
+  <a href="#dax">DAX Performance & Optimization</a>
+</nav>
+
+<h2 id="viz"  class="section-title">Interactive Data Visualization</h2>
 <section class="card">
-  <h2>Information Visualization – Programming with D3.js</h2>
+  <h3> Airline Routes </h3>
   <p>
     This interactive project was developed as the final assignment for the course 
     <strong>"Information Visualization – Programming with D3.js"</strong>, offered by New York University.
@@ -20,9 +34,13 @@
           style="border: 1px solid #ccc; border-radius: 8px;"></iframe>
 </section>
 
+<p class="backtop"><a href="#top">Back to top ↑</a></p>
+
+<h2 id="bi"   class="section-title">Business Intelligence Dashboards</h2>
+
 <!-- PROJECT: Executive Overview – Contoso -->
 <section class="card project-card">
-  <h2>Executive Overview – Contoso Sales Dashboard</h2>
+  <h3>Executive Overview – Contoso Sales Dashboard</h3>
 
   <!-- Dashboard image -->
   <img
@@ -49,101 +67,118 @@
   </p>
 </section>
 
+<p class="backtop"><a href="#top">Back to top ↑</a></p>
+
+<h2 id="dax"  class="section-title">DAX Performance &amp; Optimization</h2>
 <!-- PROJECT: DAX Deep‑Dive – Nested Iterators vs Summarize -->
 <section class="card project-card">
-  <h2>Reducing Nested Iterators in DAX – A Hands‑On Example</h2>
+  <h3>Reducing Nested Iterators in DAX – A Hands‑On Example</h3>
+
+  <p>
+  Many real‑world DAX slow‑downs stem from iterators that traverse multiple related tables row by row.
+  This case study begins with a naïve double <code>SUMX</code>—iterating first over
+  <code>Store</code>, then over <code>Customer</code>—and shows how refactoring to a single
+  <code>SUMMARIZE</code> on the <code>Sales</code> fact table removes relationship overhead,
+  eliminates callback caches, and halves execution time.
+  </p>
+
 
   <!-- Code comparison -->
-  <h3>Original query (non‑optimized)</h3>
-  <pre><code>EVALUATE
+  <h4>Original query (non‑optimized)</h4>
+  <pre class="code-box"><code>
+<span class="func">EVALUATE</span>
 {
-    SUMX(                    -- Outer iterator
+    <span class="func">SUMX</span>(                      <span class="comment">-- Outer iterator</span>
         Store,
-        SUMX(                -- Inner iterator
+        <span class="func">SUMX</span>(                  <span class="comment">-- Inner iterator</span>
             Customer,
-            [Sales Amount]   -- callback to FE
+            [Sales Amount]           <span class="comment">-- callback to FE</span>
         )
     )
 }</code></pre>
 
-  <h3>Optimized query</h3>
-  <pre><code>EVALUATE
+  <h4>Optimized query</h4>
+  <pre class="code-box"><code>
+<span class="func">EVALUATE</span>
 {
-    SUMX(
-        SUMMARIZE (
-            Sales,           -- single table
+    <span class="func">SUMX</span>(
+        <span class="func">SUMMARIZE</span>(             <span class="comment">-- single table</span>
+            Sales,
             Sales[CustomerKey],
             Sales[StoreKey]
         ),
-        [Sales Amount]       -- computed in SE
+        [Sales Amount]             <span class="comment">-- computed in SE</span>
     )
 }</code></pre>
 
-  <!-- Performance delta -->
-  <table>
-    <thead>
-      <tr><th>Metric</th><th>Original</th><th>Optimized</th></tr>
-    </thead>
-    <tbody>
-      <tr><td>Total time (ms)</td><td>45 265</td><td>22 087</td></tr>
-      <tr><td>Formula Engine (FE)</td><td>19 841</td><td>3 760</td></tr>
-      <tr><td>Storage Engine (SE)</td><td>25 424</td><td>18 327</td></tr>
-      <tr><td>SE CPU</td><td>129 906</td><td>57 578</td></tr>
-      <tr><td>SE Parallelism</td><td>× 5.1</td><td>× 3.1</td></tr>
-    </tbody>
-  </table>
+<!-- Performance delta -->
+<table class="perf-table">
+  <thead>
+    <tr>
+      <th>Metric</th>
+      <th>Original</th>
+      <th>Optimized</th>
+      <th>Δ&nbsp;(Δ%)</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Total time</td>
+      <td>45.265ms</td>
+      <td>22.087ms</td>
+      <td class="improved">↓ 51 %</td>
+    </tr>
+    <tr>
+      <td>Formula Engine&nbsp;(FE)</td>
+      <td>19.841ms</td>
+      <td>3.760ms</td>
+      <td class="improved">↓ 81 %</td>
+    </tr>
+    <tr>
+      <td>Storage Engine&nbsp;(SE)</td>
+      <td>25.424ms</td>
+      <td>18.327ms</td>
+      <td class="improved">↓ 28 %</td>
+    </tr>
+    <tr>
+      <td>SE&nbsp;CPU</td>
+      <td>129.906ms</td>
+      <td>57.578ms</td>
+      <td class="improved">↓ 56 %</td>
+    </tr>
+    <tr>
+      <td>SE&nbsp;Parallelism</td>
+      <td>× 5.1</td>
+      <td>× 3.1</td>
+      <td class="worse">↓ 39 %</td>
+    </tr>
+  </tbody>
+</table>
+
 
   <!-- Narrative -->
   <p>
-    The first version uses a <strong>double iterator</strong> (<code>SUMX(Store, SUMX(Customer…))</code>).
-    That forces the Formula Engine (FE) to loop over <em>every possible combination</em> of stores and customers,
-    triggering expensive <em>callback data caches</em> to pull partial results from the Storage Engine (SE).
-    Relationships between <code>Sales</code>, <code>Store</code> and <code>Customer</code> must also be materialized,
-    adding extra cost.
+    The first version relies on a <strong>double iterator</strong>
+    (<code>SUMX(Store, SUMX(Customer…))</code>). That forces the Formula Engine (FE)
+    to loop over <em>every possible combination</em> of stores and customers,
+    triggering costly <em>callback data caches</em> to pull partial results from the
+    Storage Engine (SE). Relationships between <code>Sales</code>,
+    <code>Store</code> and <code>Customer</code> must also be materialized, adding extra overhead.
   </p>
   <p>
-    By rewriting the query with <code>SUMMARIZE(Sales, Sales[CustomerKey], Sales[StoreKey])</code> we:
+    By rewriting the query with
+    <code>SUMMARIZE(Sales, Sales[CustomerKey], Sales[StoreKey])</code> we:
   </p>
   <ul>
-    <li>Iterate only on <em>existing</em> pairs of <code>Store&nbsp;×&nbsp;Customer</code> – no wasted loops.</li>
-    <li>Stay entirely inside the <code>Sales</code> fact table, so relationship navigation is eliminated.</li>
-    <li>Let the SE calculate <code>[Sales Amount]</code>, removing FE callbacks – FE just performs the final agregation.</li>
+    <li>Iterate only on <em>existing</em> <code>Store × Customer</code> pairs – no wasted loops.</li>
+    <li>Stay entirely inside the <code>Sales</code> fact table, eliminating relationship navigation.</li>
+    <li>Let the SE calculate <code>[Sales Amount]</code>, removing FE callbacks – the FE only performs the final aggregation.</li>
   </ul>
   <p>
-    The result is a 50 % reduction in total execution time and a FE workload that drops from 19.8 ms to 3.8 ms,
-    demonstrating how <strong>query‑plan analysis and xmSQL inspection</strong> lead to practical,
-    measurable gains.
+    The result is a 50 % reduction in total execution time and an FE workload drop
+    from 19.8 ms to 3.8 ms, proving how <strong>xmSQL inspection and query‑plan analysis</strong>
+    translate into tangible performance gains.
   </p>
 </section>
 
-
-<!-- Card 2 – Imagem ao lado do texto -->
-<section class="card" style="display: flex; gap: 30px; align-items: center; flex-wrap: wrap;">
-  <div style="flex: 2; min-width: 250px;">
-    <h3>02. Altair + Python – Visual Analytics Report</h3>
-    <p>
-      Report created using Python and Altair for advanced data storytelling. Includes visual filters, aggregation, and dynamic formatting.
-    </p>
-  </div>
-  <div style="flex: 1; min-width: 200px;">
-    <img src="img/placeholder2.png" alt="Altair Report" style="width: 100%; border-radius: 8px;">
-  </div>
-</section>
-
-<!-- Card 3 – Imagem acima do texto -->
-<section class="card">
-  <img src="img/placeholder3.png" alt="Custom Visuals" style="width: 100%; border-radius: 8px; margin-bottom: 15px;">
-  <h3>03. Custom Power BI Visual – SLA Tracker</h3>
-  <p>
-    Custom visual developed in Power BI using SVG and DAX to represent SLA timelines, including target lines, real completion, and delay indicators.
-  </p>
-</section>
-
-<!-- Card 4 – Outro exemplo simples com placeholder -->
-<section class="card">
-  <h3>04. SQL Data Mart + Power BI</h3>
-  <p>
-    Data pipeline built using SQL for creating a data mart that feeds Power BI reports. Includes ETL process, view optimization, and incremental load strategy.
-  </p>
-  <img src="img/placeholder4.png" alt="Data Mart" style="width: 100%; border-radius: 8px; margin-top: 15px;">
-</section>
+<p class="backtop"><a href="#top">Back to top ↑</a></p>
