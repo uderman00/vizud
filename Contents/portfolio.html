@@ -118,55 +118,49 @@
   </p>
 
   <table class="perf-table">
-    <thead>
-      <tr>
-        <th>Version</th>
-        <th class="numeric">Total</th>
-        <th class="numeric">FE</th>
-        <th class="numeric">SE</th>
-        <th class="numeric">SE CPU</th>
-        <th class="numeric">Parallelism</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td>Not Optimized</td>
-        <td class="numeric worse">46.107</td>
-        <td class="numeric">39.079</td>
-        <td class="numeric">7.028</td>
-        <td class="numeric">15.750</td>
-        <td class="numeric">× 2.2</td>
-      </tr>
-      <tr>
-        <td>Query Optimized</td>
-        <td class="numeric improved">22.496</td>
-        <td class="numeric">16.309</td>
-        <td class="numeric">6.187</td>
-        <td class="numeric">13.500</td>
-        <td class="numeric">× 2.2</td>
-      </tr>
-      <tr>
-        <td>+ Model Optimized</td>
-        <td class="numeric improved">18.747</td>
-        <td class="numeric">14.099</td>
-        <td class="numeric">4.648</td>
-        <td class="numeric">7.844</td>
-        <td class="numeric">× 1.7</td>
-      </tr>
-      <tr>
-        <td>Aggregation Layer</td>
-        <td class="numeric improved">10</td>
-        <td class="numeric">7</td>
-        <td class="numeric">3</td>
-        <td class="numeric">0</td>
-        <td class="numeric">× 0.0</td>
-      </tr>
-    </tbody>
-  </table>
+  <thead>
+    <tr>
+      <th>Version</th>
+      <th class="numeric">Total</th>
+      <th class="numeric">FE</th>
+      <th class="numeric">SE</th>
+      <th class="numeric">SE CPU</th>
+      <th class="numeric">Parallelism</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr style="background-color: #e0f2fe;">
+      <td><strong>Not Optimized</strong></td>
+      <td class="numeric">46.107 ms</td>
+      <td class="numeric">39.079 ms</td>
+      <td class="numeric">7.028 ms</td>
+      <td class="numeric">15.750 ms</td>
+      <td class="numeric">× 2.2</td>
+    </tr>
+    <tr>
+      <td>Query Optimized</td>
+      <td class="numeric improved">22.496 ms</td>
+      <td class="numeric improved">16.309 ms</td>
+      <td class="numeric improved">6.187 ms</td>
+      <td class="numeric improved">13.500 ms</td>
+      <td class="numeric">× 2.2</td>
+    </tr>
+    <tr>
+      <td>+ Model Optimized</td>
+      <td class="numeric improved">18.747 ms</td>
+      <td class="numeric improved">14.099 ms</td>
+      <td class="numeric improved">4.648 ms</td>
+      <td class="numeric improved">7.844 ms</td>
+      <td class="numeric worse">× 1.7</td>
+    </tr>
+    <tr>
+      <td>Aggregation Layer</td>
+      <td class="numeric improved">10.0 ms</td>
+      <td class="numeric improved">7.0 ms</td>
+      <td class="numeric improved">3.0 ms</td>
+      <td class="numeric improved">0.0 ms</td>
+      <td class="numeric worse">× 0.0</td>
+    </tr>
+  </tbody>
+</table>
 
-  <p>
-    These results reflect a journey of <strong>progressive optimization</strong>—starting with query tuning, followed by
-    <em>model redesign using surrogate tables</em>, and finally the implementation of <em>pre-aggregated tables</em> for high-level visuals.
-    This layered strategy ensures accuracy for drill-through analysis while delivering fast performance for dashboard views.
-  </p>
-</section>
