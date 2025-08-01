@@ -108,6 +108,10 @@ body {
   color: #0f172a;
   border-left: 4px solid #0f172a;
   padding-left: 12px;
+  width: 100%;
+  max-width: 850px; /* mantém limite em telas grandes */
+  border: 1px solid #e2e8f0;
+  box-sizing: border-box;
 }
 
 /************************** CARD **************************/
@@ -229,4 +233,41 @@ button[type="submit"] {
 
 button[type="submit"]:hover {
   background-color: #0ea5e9;
+}
+
+@media (max-width: 768px) {
+  .sidebar {
+    width: 100%;
+    height: auto;
+    position: relative;
+    padding: 20px;
+    text-align: center;
+  }
+
+  .main {
+    margin-left: 0;
+    padding: 20px;
+  }
+
+  .card {
+    padding: 20px;
+    margin: 15px 0;
+  }
+
+  .card img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+    margin: 0 auto;
+  }
+
+  section.card {
+    flex-direction: column !important;
+    align-items: center !important;
+    text-align: center;
+  }
+
+  section.card > div {
+    width: 100%;
+  }
 }
