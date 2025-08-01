@@ -1,7 +1,6 @@
 <!-- Contents/portfolio.html -->
 
 <h1 id="top">My Portfolio</h1>
-<!-- Card 0 – Airlines Routes -->
 
 <p class="intro">
   Welcome! Here you’ll find a curated selection of projects that showcase my range as a data professional—
@@ -15,7 +14,7 @@
   <a href="#dax">DAX Performance & Optimization</a>
 </nav>
 
-<h2 id="viz"  class="section-title">Interactive Data Visualization</h2>
+<h2 id="viz" class="section-title">Interactive Data Visualization</h2>
 <section class="card">
   <h3> Airline Routes </h3>
   <p>
@@ -36,21 +35,17 @@
 
 <p class="backtop"><a href="#top">Back to top ↑</a></p>
 
-<h2 id="bi"   class="section-title">Business Intelligence Dashboards</h2>
+<h2 id="bi" class="section-title">Business Intelligence Dashboards</h2>
 
 <!-- PROJECT: Executive Overview – Contoso -->
 <section class="card project-card">
   <h3>Executive Overview – Contoso Sales Dashboard</h3>
-
-  <!-- Dashboard image -->
   <img
     src="Projects/contoso-sales-2M/Executive Overview.png"
-    alt="Executive Overview dashboard featuring a combo bar‑line chart of Revenue vs Target, a product‑category revenue funnel, horizontal bar charts for store revenue, a sales‑channel pie chart, and a revenue‑by‑country choropleth map."
+    alt="Executive Overview dashboard featuring a combo bar + line chart of Revenue vs Target, a product‑category revenue funnel, horizontal bar charts for store revenue, a sales‑channel pie chart, and a revenue‑by‑country choropleth map."
     loading="lazy"
     style="width:100%; height:auto;"
   />
-
-  <!-- Project description -->
   <p>
     This dashboard delivers a high‑level performance snapshot for Contoso’s leadership team.
     <strong>Key elements:</strong>
@@ -69,9 +64,109 @@
 
 <p class="backtop"><a href="#top">Back to top ↑</a></p>
 
-<h2 id="dax"  class="section-title">DAX Performance &amp; Optimization</h2>
+<h2 id="dax" class="section-title">DAX Performance &amp; Optimization</h2>
 
+<!-- PROJECT: Churned Clients Case -->
+<section class="card">
+  <h3>Churn Clients – Query & Model Optimization</h3>
+  <p>
+    This case study demonstrates how a complex retention metric—"clients active in the last 360 days but inactive for 90+"—was implemented
+    and optimized in a large-scale dataset of <strong>200 million sales</strong> and <strong>2 million customers</strong>, based on the Contoso model.
+  </p>
+  <p>
+    Executives needed to monitor this churn metric monthly, ideally filtering by any date. While conceptually simple, the implementation
+    required efficient design due to the dataset size and the expensive nature of context transitions.
+  </p>
 
+  <p><strong>Initial (non-optimized) version:</strong></p>
+  <pre class="code-box"><code>
+<span class="comment">-- Not optimized</span>
+<span class="func">EVALUATE</span>
+<span class="func">VAR</span> filtroAno =
+    <span class="func">TREATAS</span> ( { 2016 }, 'Date'[Year] )
+<span class="func">RETURN</span>
+    <span class="func">SUMMARIZECOLUMNS</span> (
+        'Date'[Year Quarter],
+        filtroAno,
+        "Inactive Clients 90+ days",
+            <span class="func">VAR</span> CurrentDate = <span class="func">MAX</span> ( 'Date'[Date] )
+            <span class="func">VAR</span> ThresholdDate = CurrentDate - <span class="number">90</span>
+            <span class="func">VAR</span> limitLastPurchase = CurrentDate - <span class="number">360</span>
+            <span class="func">RETURN</span>
+                <span class="func">CALCULATE</span> (
+                    <span class="func">COUNTROWS</span>( Customer ),
+                    <span class="comment">-- Count clients inactive 90+ days</span>
+                    <span class="func">FILTER</span> (
+                        <span class="func">ALL</span> ( 'Customer'[CustomerKey] ),
+                        <span class="func">VAR</span> LastPurchase =
+                            <span class="func">CALCULATE</span> (
+                                <span class="func">MAX</span> ( 'Sales'[Order Date] ),
+                                <span class="func">ALL</span> ( 'Date' ),
+                                'Date'[Date] &lt;= CurrentDate,
+                                'Date'[Date] &gt;= limitLastPurchase
+                            )
+                        <span class="func">RETURN</span>
+                            <span class="func">NOT ISBLANK</span>( LastPurchase )
+                            &amp;&amp; LastPurchase &lt;= ThresholdDate
+                    )
+                )
+    )
+</code></pre>
 
+  <p>
+    Despite returning correct results, the above query had a high performance cost. In a test environment:
+  </p>
 
-<p class="backtop"><a href="#top">Back to top ↑</a></p>
+  <table class="perf-table">
+    <thead>
+      <tr>
+        <th>Version</th>
+        <th class="numeric">Total</th>
+        <th class="numeric">FE</th>
+        <th class="numeric">SE</th>
+        <th class="numeric">SE CPU</th>
+        <th class="numeric">Parallelism</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Not Optimized</td>
+        <td class="numeric worse">46.107</td>
+        <td class="numeric">39.079</td>
+        <td class="numeric">7.028</td>
+        <td class="numeric">15.750</td>
+        <td class="numeric">× 2.2</td>
+      </tr>
+      <tr>
+        <td>Query Optimized</td>
+        <td class="numeric improved">22.496</td>
+        <td class="numeric">16.309</td>
+        <td class="numeric">6.187</td>
+        <td class="numeric">13.500</td>
+        <td class="numeric">× 2.2</td>
+      </tr>
+      <tr>
+        <td>+ Model Optimized</td>
+        <td class="numeric improved">18.747</td>
+        <td class="numeric">14.099</td>
+        <td class="numeric">4.648</td>
+        <td class="numeric">7.844</td>
+        <td class="numeric">× 1.7</td>
+      </tr>
+      <tr>
+        <td>Aggregation Layer</td>
+        <td class="numeric improved">10</td>
+        <td class="numeric">7</td>
+        <td class="numeric">3</td>
+        <td class="numeric">0</td>
+        <td class="numeric">× 0.0</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <p>
+    These results reflect a journey of <strong>progressive optimization</strong>—starting with query tuning, followed by
+    <em>model redesign using surrogate tables</em>, and finally the implementation of <em>pre-aggregated tables</em> for high-level visuals.
+    This layered strategy ensures accuracy for drill-through analysis while delivering fast performance for dashboard views.
+  </p>
+</section>
